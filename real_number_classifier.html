@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real Number Classifier</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #eef2ff, #f8fafc);
+        color: #1e293b;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 24px;
+    }
+
+    .container {
+        width: min(900px, 100%);
+        background: white;
+        border-radius: 22px;
+        box-shadow: 0 18px 50px rgba(15, 23, 42, .12);
+        overflow: hidden;
+    }
+
+    header {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: white;
+        text-align: center;
+        padding: 34px 24px;
+    }
+
+    header h1 { font-size: clamp(28px, 5vw, 42px); margin-bottom: 10px; }
+    header p { opacity: .92; font-size: 16px; }
+
+    main { padding: 30px; }
+
+    .input-area {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    input {
+        flex: 1;
+        min-width: 0;
+        padding: 16px 18px;
+        border: 2px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 18px;
+        outline: none;
+    }
+
+    input:focus { border-color: #6366f1; }
+
+    button {
+        border: none;
+        border-radius: 12px;
+        padding: 0 22px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform .15s, opacity .15s;
+    }
+
+    button:hover { transform: translateY(-1px); opacity: .94; }
+
+    .classify { background: #4f46e5; color: white; }
+    .clear { background: #e2e8f0; color: #334155; }
+
+    .examples {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 26px;
+    }
+
+    .message {
+        display: none;
+        padding: 14px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    .message.error { display: block; background: #fee2e2; color: #991b1b; }
+
+    .results {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+
+    .card {
+        border: 2px solid #e2e8f0;
+        border-radius: 15px;
+        padding: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8fafc;
+        transition: .2s;
+    }
+
+    .card.yes {
+        border-color: #86efac;
+        background: #f0fdf4;
+    }
+
+    .card.no {
+        border-color: #fecaca;
+        background: #fef2f2;
+    }
+
+    .label { font-weight: bold; font-size: 17px; }
+    .definition { font-size: 12px; color: #64748b; margin-top: 5px; }
+
+    .badge {
+        font-weight: bold;
+        padding: 7px 11px;
+        border-radius: 999px;
+        white-space: nowrap;
+    }
+
+    .yes .badge { background: #dcfce7; color: #166534; }
+    .no .badge { background: #fee2e2; color: #991b1b; }
+
+    .explanation {
+        margin-top: 24px;
+        padding: 20px;
+        background: #f1f5f9;
+        border-radius: 15px;
+        display: none;
+    }
+
+    .explanation h2 { font-size: 20px; margin-bottom: 10px; }
+    .explanation p { line-height: 1.6; color: #475569; }
+
+    footer {
+        text-align: center;
+        padding: 18px;
+        color: #64748b;
+        font-size: 13px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    @media (max-width: 650px) {
+        .input-area { flex-direction: column; }
+        button { padding: 14px; }
+        .results { grid-template-columns: 1fr; }
+        main { padding: 20px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Real Number Classifier</h1>
+        <p>Discover which number sets your number belongs to.</p>
+    </header>
+
+    <main>
+        <div class="input-area">
+            <input id="numberInput" type="text"
+                   placeholder="Enter a number (e.g. 5, -3, 2.5, √2, π)"
+                   autocomplete="off">
+            <button class="classify" onclick="classifyNumber()">Classify</button>
+            <button class="clear" onclick="clearAll()">Clear</button>
+        </div>
+
+        <div class="examples">
+            Examples: <b>5</b>, <b>0</b>, <b>-4</b>, <b>2.5</b>, <b>1/2</b>, <b>√2</b>, <b>π</b>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div class="results">
+            <div class="card" id="natural">
+                <div>
+                    <div class="label">Natural Number</div>
+                    <div class="definition">1, 2, 3, 4, ...</div>
+                </div>
+                <span class="badge">—</span>
+            </div>
+
+            <div class="card" id="whole">
+                <div>
+                    <div class="label">Whole Number</div>
+                    <div class="definition">0, 1, 2, 3, ...</div>
+                </div>
+                <span class="badge">—</span>
+            </div>
+
+            <div class="card" id="integer">
+                <div>
+                    <div class="label">Integer</div>
+                    <div class="definition">..., -2, -1, 0, 1, 2, ...</div>
+                </div>
+                <span class="badge">—</span>
+            </div>
+
+            <div class="card" id="rational">
+                <div>
+                    <div class="label">Rational Number</div>
+                    <div class="definition">Can be written as a/b</div>
+                </div>
+                <span class="badge">—</span>
+            </div>
+
+            <div class="card" id="irrational">
+                <div>
+                    <div class="label">Irrational Number</div>
+                    <div class="definition">Cannot be written as a/b</div>
+                </div>
+                <span class="badge">—</span>
+            </div>
+
+            <div class="card" id="real">
+                <div>
+                    <div class="label">Real Number</div>
+                    <div class="definition">Rational or irrational</div>
+                </div>
+                <span class="badge">—</span>
+            </div>
+        </div>
+
+        <div class="explanation" id="explanation">
+            <h2>Why?</h2>
+            <p id="explanationText"></p>
+        </div>
+    </main>
+
+    <footer>
+        Real Number Classifier • HTML, CSS & JavaScript
+    </footer>
+</div>
+
+<script>
+function setResult(id, value) {
+    const card = document.getElementById(id);
+    const badge = card.querySelector(".badge");
+
+    card.classList.remove("yes", "no");
+
+    if (value) {
+        card.classList.add("yes");
+        badge.textContent = "✓ YES";
+    } else {
+        card.classList.add("no");
+        badge.textContent = "✗ NO";
+    }
+}
+
+function resetResults() {
+    ["natural", "whole", "integer", "rational", "irrational", "real"]
+        .forEach(id => {
+            const card = document.getElementById(id);
+            card.classList.remove("yes", "no");
+            card.querySelector(".badge").textContent = "—";
+        });
+}
+
+function showError(text) {
+    const message = document.getElementById("message");
+    message.textContent = text;
+    message.className = "message error";
+}
+
+function classifyNumber() {
+    const input = document.getElementById("numberInput").value.trim();
+    const message = document.getElementById("message");
+    const explanation = document.getElementById("explanation");
+    const explanationText = document.getElementById("explanationText");
+
+    message.className = "message";
+    explanation.style.display = "none";
+    resetResults();
+
+    if (!input) {
+        showError("Please enter a number.");
+        return;
+    }
+
+    let value;
+    let type = "finite";
+
+    // Common irrational constants
+    if (input.toLowerCase() === "pi" || input === "π") {
+        value = Math.PI;
+        type = "irrational";
+    }
+    else if (input === "√2" || input.toLowerCase() === "sqrt(2)") {
+        value = Math.sqrt(2);
+        type = "irrational";
+    }
+    else if (input === "√3" || input.toLowerCase() === "sqrt(3)") {
+        value = Math.sqrt(3);
+        type = "irrational";
+    }
+    else if (input === "√5" || input.toLowerCase() === "sqrt(5)") {
+        value = Math.sqrt(5);
+        type = "irrational";
+    }
+    else if (input.startsWith("√") || input.toLowerCase().startsWith("sqrt(")) {
+        let inside = input.startsWith("√")
+            ? input.substring(1)
+            : input.substring(5, input.length - 1);
+
+        const n = Number(inside);
+
+        if (!Number.isFinite(n) || n < 0) {
+            showError("Please enter a valid square-root expression.");
+            return;
+        }
+
+        value = Math.sqrt(n);
+
+        // √perfect-square is rational; √non-perfect-square is irrational
+        const root = Math.sqrt(n);
+        type = Number.isInteger(root) ? "rational" : "irrational";
+    }
+    // Fraction such as 1/2 or -3/4
+    else if (/^[+-]?\d+(\.\d+)?\/[+-]?\d+(\.\d+)?$/.test(input)) {
+        const parts = input.split("/");
+        const numerator = Number(parts[0]);
+        const denominator = Number(parts[1]);
+
+        if (denominator === 0) {
+            showError("A denominator cannot be zero.");
+            return;
+        }
+
+        value = numerator / denominator;
+        type = "rational";
+    }
+    else {
+        value = Number(input);
+
+        if (!Number.isFinite(value)) {
+            showError("Please enter a valid real number.");
+            return;
+        }
+
+        // Every finite decimal entered is rational.
+        type = "rational";
+    }
+
+    const isInteger = Number.isInteger(value);
+    const isNatural = isInteger && value >= 1;
+    const isWhole = isInteger && value >= 0;
+    const isRational = type === "rational" || isInteger;
+    const isIrrational = type === "irrational";
+    const isReal = true;
+
+    setResult("natural", isNatural);
+    setResult("whole", isWhole);
+    setResult("integer", isInteger);
+    setResult("rational", isRational);
+    setResult("irrational", isIrrational);
+    setResult("real", isReal);
+
+    let explanationMessage = "";
+
+    if (isIrrational) {
+        explanationMessage =
+            `"${input}" is an irrational real number. It cannot be expressed as a ratio of two integers. ` +
+            `It is not a natural, whole, or integer number.`;
+    } else if (isInteger) {
+        explanationMessage =
+            `"${input}" is an integer, so it is also rational and real. ` +
+            (isNatural
+                ? "Because it is positive, it is also a natural number and a whole number."
+                : isWhole
+                    ? "Because it is zero, it is a whole number but not a natural number."
+                    : "Because it is negative, it is neither a natural nor a whole number.");
+    } else {
+        explanationMessage =
+            `"${input}" is a rational real number because a finite decimal or fraction can be expressed as a ratio of integers. ` +
+            "It is not an integer, natural number, or whole number.";
+    }
+
+    explanationText.textContent = explanationMessage;
+    explanation.style.display = "block";
+}
+
+function clearAll() {
+    document.getElementById("numberInput").value = "";
+    document.getElementById("message").className = "message";
+    document.getElementById("explanation").style.display = "none";
+    resetResults();
+    document.getElementById("numberInput").focus();
+}
+
+document.getElementById("numberInput").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") classifyNumber();
+});
+</script>
+
+</body>
+</html>
