@@ -1,403 +1,1623 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Real Number Classifier</title>
+
 <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-        font-family: Arial, Helvetica, sans-serif;
-        min-height: 100vh;
-        background: linear-gradient(135deg, #eef2ff, #f8fafc);
-        color: #1e293b;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 24px;
+/* =========================
+   GENERAL
+========================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    color: #1e293b;
+}
+
+
+/* =========================
+   NAVIGATION BAR
+========================= */
+
+nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    background: #312e81;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    gap: 10px;
+    padding: 12px 20px;
+
+    flex-wrap: wrap;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,.15);
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+
+    padding: 10px 18px;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    transition: .2s;
+}
+
+nav a:hover {
+    background: rgba(255,255,255,.18);
+    transform: translateY(-1px);
+}
+
+
+/* =========================
+   MAIN CONTAINER
+========================= */
+
+.container {
+    width: min(1000px, 94%);
+
+    margin: 30px auto;
+
+    background: white;
+
+    border-radius: 22px;
+
+    box-shadow: 0 18px 50px rgba(15, 23, 42, .12);
+
+    overflow: hidden;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+header {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+
+    color: white;
+
+    text-align: center;
+
+    padding: 55px 24px;
+}
+
+header h1 {
+    font-size: clamp(30px, 5vw, 48px);
+    margin-bottom: 12px;
+}
+
+header p {
+    opacity: .94;
+    font-size: 17px;
+}
+
+
+/* =========================
+   SECTIONS
+========================= */
+
+.section {
+    padding: 40px 35px;
+
+    border-top: 1px solid #e2e8f0;
+}
+
+.section h2 {
+    color: #4f46e5;
+
+    font-size: 28px;
+
+    margin-bottom: 15px;
+}
+
+.section > p {
+    color: #475569;
+
+    line-height: 1.7;
+
+    margin-bottom: 20px;
+}
+
+
+/* =========================
+   CLASSIFIER
+========================= */
+
+#classifier {
+    padding: 35px;
+}
+
+.input-area {
+    display: flex;
+
+    gap: 12px;
+
+    margin-bottom: 12px;
+}
+
+input {
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 16px 18px;
+
+    border: 2px solid #cbd5e1;
+
+    border-radius: 12px;
+
+    font-size: 18px;
+
+    outline: none;
+}
+
+input:focus {
+    border-color: #6366f1;
+
+    box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+}
+
+button {
+    border: none;
+
+    border-radius: 12px;
+
+    padding: 0 22px;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: transform .15s, opacity .15s;
+}
+
+button:hover {
+    transform: translateY(-1px);
+
+    opacity: .94;
+}
+
+.classify {
+    background: #4f46e5;
+
+    color: white;
+}
+
+.clear {
+    background: #e2e8f0;
+
+    color: #334155;
+}
+
+.examples {
+    color: #64748b;
+
+    font-size: 14px;
+
+    margin-bottom: 26px;
+}
+
+
+/* =========================
+   ERROR MESSAGE
+========================= */
+
+.message {
+    display: none;
+
+    padding: 14px;
+
+    border-radius: 10px;
+
+    margin-bottom: 20px;
+
+    font-weight: 600;
+}
+
+.message.error {
+    display: block;
+
+    background: #fee2e2;
+
+    color: #991b1b;
+}
+
+
+/* =========================
+   RESULTS
+========================= */
+
+.results {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 14px;
+}
+
+.card {
+    border: 2px solid #e2e8f0;
+
+    border-radius: 15px;
+
+    padding: 18px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    background: #f8fafc;
+
+    transition: .2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card.yes {
+    border-color: #86efac;
+
+    background: #f0fdf4;
+}
+
+.card.no {
+    border-color: #fecaca;
+
+    background: #fef2f2;
+}
+
+.label {
+    font-weight: bold;
+
+    font-size: 17px;
+}
+
+.definition {
+    font-size: 12px;
+
+    color: #64748b;
+
+    margin-top: 5px;
+}
+
+.badge {
+    font-weight: bold;
+
+    padding: 7px 11px;
+
+    border-radius: 999px;
+
+    white-space: nowrap;
+}
+
+.yes .badge {
+    background: #dcfce7;
+
+    color: #166534;
+}
+
+.no .badge {
+    background: #fee2e2;
+
+    color: #991b1b;
+}
+
+
+/* =========================
+   EXPLANATION
+========================= */
+
+.explanation {
+    margin-top: 24px;
+
+    padding: 20px;
+
+    background: #f1f5f9;
+
+    border-radius: 15px;
+
+    display: none;
+}
+
+.explanation h2 {
+    font-size: 20px;
+
+    margin-bottom: 10px;
+}
+
+.explanation p {
+    line-height: 1.6;
+
+    color: #475569;
+}
+
+
+/* =========================
+   HOW IT WORKS
+========================= */
+
+.steps {
+    margin-top: 20px;
+}
+
+.step {
+    margin-bottom: 12px;
+
+    padding: 17px;
+
+    background: #f8fafc;
+
+    border-left: 5px solid #4f46e5;
+
+    border-radius: 8px;
+
+    line-height: 1.5;
+}
+
+.step strong {
+    color: #4f46e5;
+}
+
+
+/* =========================
+   AUTHORS
+========================= */
+
+.authors {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 18px;
+
+    margin-top: 25px;
+}
+
+.author-card {
+    background: #f8fafc;
+
+    border: 2px solid #e2e8f0;
+
+    border-radius: 16px;
+
+    padding: 20px;
+
+    text-align: center;
+
+    transition: .25s;
+}
+
+.author-card:hover {
+    transform: translateY(-5px);
+
+    box-shadow: 0 10px 25px rgba(15, 23, 42, .1);
+
+    border-color: #818cf8;
+}
+
+
+/* AUTHOR IMAGE */
+
+.author-card img {
+    width: 105px;
+
+    height: 105px;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    border: 4px solid #4f46e5;
+
+    margin-bottom: 12px;
+
+    background: #e0e7ff;
+}
+
+
+/* PLACEHOLDER WHEN NO IMAGE */
+
+.author-placeholder {
+    width: 105px;
+
+    height: 105px;
+
+    margin: 0 auto 12px;
+
+    border-radius: 50%;
+
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 32px;
+
+    font-weight: bold;
+
+    border: 4px solid #c7d2fe;
+}
+
+.author-card h3 {
+    font-size: 16px;
+
+    margin-bottom: 6px;
+
+    color: #1e293b;
+}
+
+.author-card p {
+    font-size: 13px;
+
+    color: #64748b;
+
+    line-height: 1.4;
+}
+
+
+/* =========================
+   BACK TO TOP
+========================= */
+
+.back-top {
+    display: inline-block;
+
+    margin-top: 15px;
+
+    color: #4f46e5;
+
+    text-decoration: none;
+
+    font-weight: bold;
+}
+
+.back-top:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+    text-align: center;
+
+    padding: 22px;
+
+    color: #64748b;
+
+    font-size: 13px;
+
+    border-top: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 800px) {
+
+    .authors {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    .container {
-        width: min(900px, 100%);
-        background: white;
-        border-radius: 22px;
-        box-shadow: 0 18px 50px rgba(15, 23, 42, .12);
-        overflow: hidden;
+}
+
+@media (max-width: 650px) {
+
+    nav {
+        gap: 5px;
     }
 
-    header {
-        background: linear-gradient(135deg, #4f46e5, #7c3aed);
-        color: white;
-        text-align: center;
-        padding: 34px 24px;
+    nav a {
+        padding: 8px 10px;
+
+        font-size: 12px;
     }
-
-    header h1 { font-size: clamp(28px, 5vw, 42px); margin-bottom: 10px; }
-    header p { opacity: .92; font-size: 16px; }
-
-    main { padding: 30px; }
 
     .input-area {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 12px;
+        flex-direction: column;
     }
-
-    input {
-        flex: 1;
-        min-width: 0;
-        padding: 16px 18px;
-        border: 2px solid #cbd5e1;
-        border-radius: 12px;
-        font-size: 18px;
-        outline: none;
-    }
-
-    input:focus { border-color: #6366f1; }
 
     button {
-        border: none;
-        border-radius: 12px;
-        padding: 0 22px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: transform .15s, opacity .15s;
-    }
-
-    button:hover { transform: translateY(-1px); opacity: .94; }
-
-    .classify { background: #4f46e5; color: white; }
-    .clear { background: #e2e8f0; color: #334155; }
-
-    .examples {
-        color: #64748b;
-        font-size: 14px;
-        margin-bottom: 26px;
-    }
-
-    .message {
-        display: none;
         padding: 14px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        font-weight: 600;
     }
-
-    .message.error { display: block; background: #fee2e2; color: #991b1b; }
 
     .results {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 14px;
+        grid-template-columns: 1fr;
     }
 
-    .card {
-        border: 2px solid #e2e8f0;
-        border-radius: 15px;
-        padding: 18px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #f8fafc;
-        transition: .2s;
+    .authors {
+        grid-template-columns: 1fr;
     }
 
-    .card.yes {
-        border-color: #86efac;
-        background: #f0fdf4;
+    .section,
+    #classifier {
+        padding: 25px 20px;
     }
 
-    .card.no {
-        border-color: #fecaca;
-        background: #fef2f2;
-    }
+}
 
-    .label { font-weight: bold; font-size: 17px; }
-    .definition { font-size: 12px; color: #64748b; margin-top: 5px; }
-
-    .badge {
-        font-weight: bold;
-        padding: 7px 11px;
-        border-radius: 999px;
-        white-space: nowrap;
-    }
-
-    .yes .badge { background: #dcfce7; color: #166534; }
-    .no .badge { background: #fee2e2; color: #991b1b; }
-
-    .explanation {
-        margin-top: 24px;
-        padding: 20px;
-        background: #f1f5f9;
-        border-radius: 15px;
-        display: none;
-    }
-
-    .explanation h2 { font-size: 20px; margin-bottom: 10px; }
-    .explanation p { line-height: 1.6; color: #475569; }
-
-    footer {
-        text-align: center;
-        padding: 18px;
-        color: #64748b;
-        font-size: 13px;
-        border-top: 1px solid #e2e8f0;
-    }
-
-    @media (max-width: 650px) {
-        .input-area { flex-direction: column; }
-        button { padding: 14px; }
-        .results { grid-template-columns: 1fr; }
-        main { padding: 20px; }
-    }
 </style>
 </head>
+
+
 <body>
 
+<!-- =========================
+     NAVIGATION
+========================= -->
+
+<nav>
+
+    <a href="#home">Home</a>
+
+    <a href="#classifier">Solve</a>
+
+    <a href="#about">About</a>
+
+    <a href="#how-it-works">How It Works</a>
+
+    <a href="#authors">Authors</a>
+
+</nav>
+
+
 <div class="container">
-    <header>
-        <h1>Real Number Classifier</h1>
-        <p>Discover which number sets your number belongs to.</p>
-    </header>
 
-    <main>
-        <div class="input-area">
-            <input id="numberInput" type="text"
-                   placeholder="Enter a number (e.g. 5, -3, 2.5, √2, π)"
-                   autocomplete="off">
-            <button class="classify" onclick="classifyNumber()">Classify</button>
-            <button class="clear" onclick="clearAll()">Clear</button>
+
+<!-- =========================
+     HOME / HEADER
+========================= -->
+
+<header id="home">
+
+    <h1>Real Number Classifier</h1>
+
+    <p>
+        Discover which number sets your number belongs to.
+    </p>
+
+</header>
+
+
+<!-- =========================
+     SOLVING AREA
+========================= -->
+
+<main id="classifier">
+
+    <h2>🧮 Solve and Classify</h2>
+
+    <p style="color:#64748b; margin-bottom:20px;">
+        Enter a number below and the system will determine whether
+        it is a natural, whole, integer, rational, irrational,
+        and real number.
+    </p>
+
+
+    <div class="input-area">
+
+        <input
+            id="numberInput"
+            type="text"
+            placeholder="Enter a number (e.g. 5, -3, 2.5, √2, π)"
+            autocomplete="off"
+        >
+
+        <button
+            class="classify"
+            onclick="classifyNumber()">
+            Classify
+        </button>
+
+        <button
+            class="clear"
+            onclick="clearAll()">
+            Clear
+        </button>
+
+    </div>
+
+
+    <div class="examples">
+
+        Examples:
+        <b>5</b>,
+        <b>0</b>,
+        <b>-4</b>,
+        <b>2.5</b>,
+        <b>1/2</b>,
+        <b>√2</b>,
+        <b>π</b>
+
+    </div>
+
+
+    <div id="message" class="message"></div>
+
+
+    <!-- RESULTS -->
+
+    <div class="results">
+
+
+        <div class="card" id="natural">
+
+            <div>
+
+                <div class="label">
+                    Natural Number
+                </div>
+
+                <div class="definition">
+                    1, 2, 3, 4, ...
+                </div>
+
+            </div>
+
+            <span class="badge">—</span>
+
         </div>
 
-        <div class="examples">
-            Examples: <b>5</b>, <b>0</b>, <b>-4</b>, <b>2.5</b>, <b>1/2</b>, <b>√2</b>, <b>π</b>
+
+        <div class="card" id="whole">
+
+            <div>
+
+                <div class="label">
+                    Whole Number
+                </div>
+
+                <div class="definition">
+                    0, 1, 2, 3, ...
+                </div>
+
+            </div>
+
+            <span class="badge">—</span>
+
         </div>
 
-        <div id="message" class="message"></div>
 
-        <div class="results">
-            <div class="card" id="natural">
-                <div>
-                    <div class="label">Natural Number</div>
-                    <div class="definition">1, 2, 3, 4, ...</div>
+        <div class="card" id="integer">
+
+            <div>
+
+                <div class="label">
+                    Integer
                 </div>
-                <span class="badge">—</span>
+
+                <div class="definition">
+                    ..., -2, -1, 0, 1, 2, ...
+                </div>
+
             </div>
 
-            <div class="card" id="whole">
-                <div>
-                    <div class="label">Whole Number</div>
-                    <div class="definition">0, 1, 2, 3, ...</div>
-                </div>
-                <span class="badge">—</span>
-            </div>
+            <span class="badge">—</span>
 
-            <div class="card" id="integer">
-                <div>
-                    <div class="label">Integer</div>
-                    <div class="definition">..., -2, -1, 0, 1, 2, ...</div>
-                </div>
-                <span class="badge">—</span>
-            </div>
-
-            <div class="card" id="rational">
-                <div>
-                    <div class="label">Rational Number</div>
-                    <div class="definition">Can be written as a/b</div>
-                </div>
-                <span class="badge">—</span>
-            </div>
-
-            <div class="card" id="irrational">
-                <div>
-                    <div class="label">Irrational Number</div>
-                    <div class="definition">Cannot be written as a/b</div>
-                </div>
-                <span class="badge">—</span>
-            </div>
-
-            <div class="card" id="real">
-                <div>
-                    <div class="label">Real Number</div>
-                    <div class="definition">Rational or irrational</div>
-                </div>
-                <span class="badge">—</span>
-            </div>
         </div>
 
-        <div class="explanation" id="explanation">
-            <h2>Why?</h2>
-            <p id="explanationText"></p>
-        </div>
-    </main>
 
-    <footer>
-        Real Number Classifier • HTML, CSS & JavaScript
-    </footer>
+        <div class="card" id="rational">
+
+            <div>
+
+                <div class="label">
+                    Rational Number
+                </div>
+
+                <div class="definition">
+                    Can be written as a/b
+                </div>
+
+            </div>
+
+            <span class="badge">—</span>
+
+        </div>
+
+
+        <div class="card" id="irrational">
+
+            <div>
+
+                <div class="label">
+                    Irrational Number
+                </div>
+
+                <div class="definition">
+                    Cannot be written as a/b
+                </div>
+
+            </div>
+
+            <span class="badge">—</span>
+
+        </div>
+
+
+        <div class="card" id="real">
+
+            <div>
+
+                <div class="label">
+                    Real Number
+                </div>
+
+                <div class="definition">
+                    Rational or irrational
+                </div>
+
+            </div>
+
+            <span class="badge">—</span>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- EXPLANATION -->
+
+    <div class="explanation" id="explanation">
+
+        <h2>Why?</h2>
+
+        <p id="explanationText"></p>
+
+    </div>
+
+</main>
+
+
+<!-- =========================
+     ABOUT
+========================= -->
+
+<section class="section" id="about">
+
+    <h2>📖 About the Website</h2>
+
+    <p>
+        The Real Number Classifier is an educational website designed
+        to help students understand the different classifications of
+        real numbers.
+    </p>
+
+    <p>
+        The website allows users to enter a number and automatically
+        determine whether the number belongs to the natural,
+        whole, integer, rational, irrational, and real number sets.
+    </p>
+
+    <p>
+        This project combines mathematics with web development using
+        HTML, CSS, and JavaScript. It is designed to provide a simple,
+        interactive, and user-friendly way of learning about the
+        real number system.
+    </p>
+
+    <a href="#classifier" class="back-top">
+        ↑ Try the Classifier
+    </a>
+
+</section>
+
+
+<!-- =========================
+     HOW IT WORKS
+========================= -->
+
+<section class="section" id="how-it-works">
+
+    <h2>⚙️ How It Works</h2>
+
+    <p>
+        Follow these simple steps to classify a number:
+    </p>
+
+
+    <div class="steps">
+
+        <div class="step">
+
+            <strong>Step 1:</strong>
+
+            Enter a number in the input box.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>Step 2:</strong>
+
+            Click the <b>Classify</b> button.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>Step 3:</strong>
+
+            The system analyzes the number and checks
+            which number sets it belongs to.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>Step 4:</strong>
+
+            The results will appear as
+            <b>YES</b> or <b>NO</b>.
+
+        </div>
+
+
+        <div class="step">
+
+            <strong>Step 5:</strong>
+
+            Read the explanation below the results
+            to understand why the number belongs to
+            those classifications.
+
+        </div>
+
+    </div>
+
+
+    <a href="#classifier" class="back-top">
+        ↑ Back to Classifier
+    </a>
+
+</section>
+
+
+<!-- =========================
+     AUTHORS
+========================= -->
+
+<section class="section" id="authors">
+
+    <h2>👥 Meet the Authors</h2>
+
+    <p>
+        The Real Number Classifier was created as a collaborative
+        educational project by the following authors:
+    </p>
+
+
+    <div class="authors">
+
+
+        <!-- AUTHOR 1 -->
+
+        <div class="author-card">
+
+            <div class="author-placeholder">
+                E
+            </div>
+
+            <!--
+            To add a photo, replace the div above with:
+
+            <img src="images/ed-briar.jpg"
+                 alt="Ed Briar Acuesta">
+            -->
+
+            <h3>
+                Ed Briar Acuesta
+            </h3>
+
+            <p>
+                Developer / Programmer
+            </p>
+
+        </div>
+
+
+        <!-- AUTHOR 2 -->
+
+        <div class="author-card">
+
+            <div class="author-placeholder">
+                M
+            </div>
+
+            <h3>
+                Mikayla Dayaday
+            </h3>
+
+            <p>
+                Developer / Researcher
+            </p>
+
+        </div>
+
+
+        <!-- AUTHOR 3 -->
+
+        <div class="author-card">
+
+            <div class="author-placeholder">
+                J
+            </div>
+
+            <h3>
+                Johann Verdi Gayoma
+            </h3>
+
+            <p>
+                Researcher / Documentation
+            </p>
+
+        </div>
+
+
+        <!-- AUTHOR 4 -->
+
+        <div class="author-card">
+
+            <div class="author-placeholder">
+                C
+            </div>
+
+            <h3>
+                Crystal Lanceta
+            </h3>
+
+            <p>
+                UI / Design
+            </p>
+
+        </div>
+
+
+        <!-- AUTHOR 5 -->
+
+        <div class="author-card">
+
+            <div class="author-placeholder">
+                J
+            </div>
+
+            <h3>
+                Jezilla Mayrelle Mahumoc
+            </h3>
+
+            <p>
+                Researcher / Documentation
+            </p>
+
+        </div>
+
+
+        <!-- AUTHOR 6 -->
+
+        <div class="author-card">
+
+            <div class="author-placeholder">
+                B
+            </div>
+
+            <h3>
+                Bernard Pedregosa
+            </h3>
+
+            <p>
+                Developer / Tester
+            </p>
+
+        </div>
+
+
+        <!-- AUTHOR 7 -->
+
+        <div class="author-card">
+
+            <div class="author-placeholder">
+                A
+            </div>
+
+            <h3>
+                Angelica Jade Perez
+            </h3>
+
+            <p>
+                UI / Design
+            </p>
+
+        </div>
+
+
+        <!-- AUTHOR 8 -->
+
+        <div class="author-card">
+
+            <div class="author-placeholder">
+                J
+            </div>
+
+            <h3>
+                Jorge Angelo Totesora
+            </h3>
+
+            <p>
+                Developer / Researcher
+            </p>
+
+        </div>
+
+
+    </div>
+
+
+    <a href="#home" class="back-top">
+        ↑ Back to Top
+    </a>
+
+</section>
+
+
+<!-- =========================
+     FOOTER
+========================= -->
+
+<footer>
+
+    <p>
+        Real Number Classifier
+    </p>
+
+    <p style="margin-top:5px;">
+        Created using HTML, CSS & JavaScript
+    </p>
+
+    <p style="margin-top:5px;">
+        © 2026 Real Number Classifier Team
+    </p>
+
+</footer>
+
+
 </div>
 
+
+<!-- =========================
+     JAVASCRIPT
+========================= -->
+
 <script>
+
+
 function setResult(id, value) {
-    const card = document.getElementById(id);
-    const badge = card.querySelector(".badge");
+
+    const card =
+        document.getElementById(id);
+
+    const badge =
+        card.querySelector(".badge");
+
 
     card.classList.remove("yes", "no");
 
+
     if (value) {
+
         card.classList.add("yes");
+
         badge.textContent = "✓ YES";
-    } else {
-        card.classList.add("no");
-        badge.textContent = "✗ NO";
+
     }
+
+    else {
+
+        card.classList.add("no");
+
+        badge.textContent = "✗ NO";
+
+    }
+
 }
+
 
 function resetResults() {
-    ["natural", "whole", "integer", "rational", "irrational", "real"]
-        .forEach(id => {
-            const card = document.getElementById(id);
-            card.classList.remove("yes", "no");
-            card.querySelector(".badge").textContent = "—";
-        });
+
+    [
+        "natural",
+        "whole",
+        "integer",
+        "rational",
+        "irrational",
+        "real"
+
+    ].forEach(id => {
+
+        const card =
+            document.getElementById(id);
+
+        card.classList.remove(
+            "yes",
+            "no"
+        );
+
+        card.querySelector(
+            ".badge"
+        ).textContent = "—";
+
+    });
+
 }
+
 
 function showError(text) {
-    const message = document.getElementById("message");
+
+    const message =
+        document.getElementById("message");
+
     message.textContent = text;
-    message.className = "message error";
+
+    message.className =
+        "message error";
+
 }
+
 
 function classifyNumber() {
-    const input = document.getElementById("numberInput").value.trim();
-    const message = document.getElementById("message");
-    const explanation = document.getElementById("explanation");
-    const explanationText = document.getElementById("explanationText");
 
-    message.className = "message";
-    explanation.style.display = "none";
+    const input =
+        document.getElementById(
+            "numberInput"
+        ).value.trim();
+
+
+    const message =
+        document.getElementById(
+            "message"
+        );
+
+
+    const explanation =
+        document.getElementById(
+            "explanation"
+        );
+
+
+    const explanationText =
+        document.getElementById(
+            "explanationText"
+        );
+
+
+    message.className =
+        "message";
+
+
+    explanation.style.display =
+        "none";
+
+
     resetResults();
+
 
     if (!input) {
-        showError("Please enter a number.");
+
+        showError(
+            "Please enter a number."
+        );
+
         return;
+
     }
+
 
     let value;
+
     let type = "finite";
 
-    // Common irrational constants
-    if (input.toLowerCase() === "pi" || input === "π") {
+
+    /* PI */
+
+    if (
+        input.toLowerCase() === "pi" ||
+        input === "π"
+    ) {
+
         value = Math.PI;
+
         type = "irrational";
+
     }
-    else if (input === "√2" || input.toLowerCase() === "sqrt(2)") {
+
+
+    /* √2 */
+
+    else if (
+        input === "√2" ||
+        input.toLowerCase() === "sqrt(2)"
+    ) {
+
         value = Math.sqrt(2);
+
         type = "irrational";
+
     }
-    else if (input === "√3" || input.toLowerCase() === "sqrt(3)") {
+
+
+    /* √3 */
+
+    else if (
+        input === "√3" ||
+        input.toLowerCase() === "sqrt(3)"
+    ) {
+
         value = Math.sqrt(3);
+
         type = "irrational";
+
     }
-    else if (input === "√5" || input.toLowerCase() === "sqrt(5)") {
+
+
+    /* √5 */
+
+    else if (
+        input === "√5" ||
+        input.toLowerCase() === "sqrt(5)"
+    ) {
+
         value = Math.sqrt(5);
+
         type = "irrational";
+
     }
-    else if (input.startsWith("√") || input.toLowerCase().startsWith("sqrt(")) {
-        let inside = input.startsWith("√")
+
+
+    /* OTHER SQUARE ROOTS */
+
+    else if (
+        input.startsWith("√") ||
+        input.toLowerCase()
+            .startsWith("sqrt(")
+    ) {
+
+
+        let inside =
+            input.startsWith("√")
+
             ? input.substring(1)
-            : input.substring(5, input.length - 1);
 
-        const n = Number(inside);
+            : input.substring(
+                5,
+                input.length - 1
+            );
 
-        if (!Number.isFinite(n) || n < 0) {
-            showError("Please enter a valid square-root expression.");
+
+        const n =
+            Number(inside);
+
+
+        if (
+            !Number.isFinite(n) ||
+            n < 0
+        ) {
+
+            showError(
+                "Please enter a valid square-root expression."
+            );
+
             return;
+
         }
 
-        value = Math.sqrt(n);
 
-        // √perfect-square is rational; √non-perfect-square is irrational
-        const root = Math.sqrt(n);
-        type = Number.isInteger(root) ? "rational" : "irrational";
+        value =
+            Math.sqrt(n);
+
+
+        const root =
+            Math.sqrt(n);
+
+
+        type =
+            Number.isInteger(root)
+
+            ? "rational"
+
+            : "irrational";
+
     }
-    // Fraction such as 1/2 or -3/4
-    else if (/^[+-]?\d+(\.\d+)?\/[+-]?\d+(\.\d+)?$/.test(input)) {
-        const parts = input.split("/");
-        const numerator = Number(parts[0]);
-        const denominator = Number(parts[1]);
 
-        if (denominator === 0) {
-            showError("A denominator cannot be zero.");
+
+    /* FRACTIONS */
+
+    else if (
+        /^[+-]?\d+(\.\d+)?\/[+-]?\d+(\.\d+)?$/
+            .test(input)
+    ) {
+
+
+        const parts =
+            input.split("/");
+
+
+        const numerator =
+            Number(parts[0]);
+
+
+        const denominator =
+            Number(parts[1]);
+
+
+        if (
+            denominator === 0
+        ) {
+
+            showError(
+                "A denominator cannot be zero."
+            );
+
             return;
+
         }
 
-        value = numerator / denominator;
-        type = "rational";
+
+        value =
+            numerator / denominator;
+
+
+        type =
+            "rational";
+
     }
+
+
+    /* REGULAR NUMBERS */
+
     else {
-        value = Number(input);
 
-        if (!Number.isFinite(value)) {
-            showError("Please enter a valid real number.");
+        value =
+            Number(input);
+
+
+        if (
+            !Number.isFinite(value)
+        ) {
+
+            showError(
+                "Please enter a valid real number."
+            );
+
             return;
+
         }
 
-        // Every finite decimal entered is rational.
-        type = "rational";
+
+        type =
+            "rational";
+
     }
 
-    const isInteger = Number.isInteger(value);
-    const isNatural = isInteger && value >= 1;
-    const isWhole = isInteger && value >= 0;
-    const isRational = type === "rational" || isInteger;
-    const isIrrational = type === "irrational";
-    const isReal = true;
 
-    setResult("natural", isNatural);
-    setResult("whole", isWhole);
-    setResult("integer", isInteger);
-    setResult("rational", isRational);
-    setResult("irrational", isIrrational);
-    setResult("real", isReal);
+    /* CLASSIFICATION */
 
-    let explanationMessage = "";
+    const isInteger =
+        Number.isInteger(value);
+
+
+    const isNatural =
+        isInteger &&
+        value >= 1;
+
+
+    const isWhole =
+        isInteger &&
+        value >= 0;
+
+
+    const isRational =
+        type === "rational" ||
+        isInteger;
+
+
+    const isIrrational =
+        type === "irrational";
+
+
+    const isReal =
+        true;
+
+
+    /* DISPLAY RESULTS */
+
+    setResult(
+        "natural",
+        isNatural
+    );
+
+
+    setResult(
+        "whole",
+        isWhole
+    );
+
+
+    setResult(
+        "integer",
+        isInteger
+    );
+
+
+    setResult(
+        "rational",
+        isRational
+    );
+
+
+    setResult(
+        "irrational",
+        isIrrational
+    );
+
+
+    setResult(
+        "real",
+        isReal
+    );
+
+
+    /* EXPLANATION */
+
+    let explanationMessage =
+        "";
+
 
     if (isIrrational) {
+
         explanationMessage =
-            `"${input}" is an irrational real number. It cannot be expressed as a ratio of two integers. ` +
+            `"${input}" is an irrational real number. ` +
+            `It cannot be expressed as a ratio of two integers. ` +
             `It is not a natural, whole, or integer number.`;
-    } else if (isInteger) {
-        explanationMessage =
-            `"${input}" is an integer, so it is also rational and real. ` +
-            (isNatural
-                ? "Because it is positive, it is also a natural number and a whole number."
-                : isWhole
-                    ? "Because it is zero, it is a whole number but not a natural number."
-                    : "Because it is negative, it is neither a natural nor a whole number.");
-    } else {
-        explanationMessage =
-            `"${input}" is a rational real number because a finite decimal or fraction can be expressed as a ratio of integers. ` +
-            "It is not an integer, natural number, or whole number.";
+
     }
 
-    explanationText.textContent = explanationMessage;
-    explanation.style.display = "block";
+
+    else if (isInteger) {
+
+        explanationMessage =
+            `"${input}" is an integer, so it is also rational and real. ` +
+
+            (
+                isNatural
+
+                ? "Because it is positive, it is also a natural number and a whole number."
+
+                : isWhole
+
+                    ? "Because it is zero, it is a whole number but not a natural number."
+
+                    : "Because it is negative, it is neither a natural nor a whole number."
+            );
+
+    }
+
+
+    else {
+
+        explanationMessage =
+            `"${input}" is a rational real number because a finite decimal or fraction can be expressed as a ratio of integers. ` +
+
+            "It is not an integer, natural number, or whole number.";
+
+    }
+
+
+    explanationText.textContent =
+        explanationMessage;
+
+
+    explanation.style.display =
+        "block";
+
 }
+
+
+/* CLEAR BUTTON */
 
 function clearAll() {
-    document.getElementById("numberInput").value = "";
-    document.getElementById("message").className = "message";
-    document.getElementById("explanation").style.display = "none";
+
+    document.getElementById(
+        "numberInput"
+    ).value = "";
+
+
+    document.getElementById(
+        "message"
+    ).className = "message";
+
+
+    document.getElementById(
+        "explanation"
+    ).style.display = "none";
+
+
     resetResults();
-    document.getElementById("numberInput").focus();
+
+
+    document.getElementById(
+        "numberInput"
+    ).focus();
+
 }
 
-document.getElementById("numberInput").addEventListener("keydown", function(event) {
-    if (event.key === "Enter") classifyNumber();
-});
+
+/* ENTER KEY */
+
+document
+    .getElementById("numberInput")
+    .addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                classifyNumber();
+
+            }
+
+        }
+    );
+
+
 </script>
 
 </body>
 </html>
+```
